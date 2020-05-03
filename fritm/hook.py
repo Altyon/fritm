@@ -9,15 +9,15 @@ import frida
 SCRIPT = (Path(__file__).parent / "script.js").read_text()
 
 
-def spawn_and_hook(program, port=8080, filter="true"):
+def spawn_and_hook(program, port=8080, filter="true", verbose="false"):
     pid = frida.spawn(program)
-    hook(pid, port, filter)
+    hook(pid, port, filter, verbose)
     frida.resume(pid)
 
 
-def hook(target, port=8080, filter="true"):
+def hook(target, port=8080, filter="true", verbose="false"):
     session = frida.attach(target)
-    script = SCRIPT.replace("PORT", str(port)).replace("FILTER", filter)
+    script = SCRIPT.replace("PORT", str(port)).replace("FILTER", filter).replace("VERBOSE", verbose)
     frida_script = session.create_script(script)
     frida_script.load()
 
@@ -39,8 +39,15 @@ def hook(target, port=8080, filter="true"):
     default="true",
     show_default=True,
 )
-def _main_spawn(target, port, filter):
-    spawn_and_hook(target, port, filter)
+@click.option(
+    "--verbose",
+    type=str,
+    help="Log more info",
+    default="false",
+    show_default=True,
+)
+def _main_spawn(target, port, filter, verbose):
+    spawn_and_hook(target, port, filter, verbose)
     if not sys.flags.interactive:
         sys.stdin.read()  # infinite loop
 
@@ -62,9 +69,16 @@ def _main_spawn(target, port, filter):
     default="true",
     show_default=True,
 )
-def _main_hook(target, port, filter):
+@click.option(
+    "--verbose",
+    type=str,
+    help="Log more info",
+    default="false",
+    show_default=True,
+)
+def _main_hook(target, port, filter, verbose):
     if str.isdigit(target):
         target = int(target)
-    hook(target, port, filter)
+    hook(target, port, filter, verbose)
     if not sys.flags.interactive:
         sys.stdin.read()  # infinite loop

@@ -31,14 +31,14 @@ Interceptor.attach(connect_p, {
         sockaddr_p.add(2).writeByteArray([Math.floor(newport / 256), newport % 256]);
         sockaddr_p.add(4).writeByteArray([127, 0, 0, 1]);
 
-        console.log("connection to:", this.addr, this.port);
+        if(VERBOSE) console.log("connection to:", this.addr, this.port);
     },
     onLeave: function (retval) {
         if (!this.hook)
             return;
 
         // retval should be 0 but it is -1 on windows
-        console.log("retval:", retval.toInt32());
+        if(VERBOSE) console.log("retval:", retval.toInt32());
         var connect_request = "CONNECT " + this.addr + ":" + this.port + " HTTP/1.0\n\n";
         var buf_send = Memory.allocUtf8String(connect_request);
         socket_send(this.sockfd.toInt32(), buf_send, connect_request.length, 0);
@@ -51,6 +51,6 @@ Interceptor.attach(connect_p, {
             Thread.sleep(0.05);
             recv_return = socket_recv(this.sockfd.toInt32(), buf_recv, 512, 0);
         }
-        console.log(buf_recv.readCString());
+        if(VERBOSE) console.log(buf_recv.readCString());
     }
 })

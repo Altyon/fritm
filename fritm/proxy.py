@@ -42,11 +42,14 @@ class ThreadingHTTPServer(ThreadingMixIn, HTTPServer):
     pass
 
 
-def make_proxy_request_handler(callback):
+def make_proxy_request_handler(callback, verbose):
     """Returns a class inheriting from BaseHTTPRequestHandler
     """
 
     class ProxyRequestHandler(BaseHTTPRequestHandler):
+        if verbose:
+            def log_message(self, format, *args):
+                pass
         def do_CONNECT(self):
             """This method is called when the client tries
             to open a socket through our HTTP tunnel
@@ -81,7 +84,7 @@ def make_proxy_request_handler(callback):
     return ProxyRequestHandler
 
 
-def start_proxy_server(callback, port=8080):
+def start_proxy_server(callback, port=8080, verbose=False):
     """Opens an http tunnel
     When a CONNECT request is made, it opens the socket
     to the real address and calls
@@ -91,7 +94,7 @@ def start_proxy_server(callback, port=8080):
     `httpd.server_close()`
     """
     httpd = ThreadingHTTPServer(
-        ("localhost", port), make_proxy_request_handler(callback)
+        ("localhost", port), make_proxy_request_handler(callback, verbose)
     )
     Thread(target=httpd.serve_forever).start()
     return httpd
