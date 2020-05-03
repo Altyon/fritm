@@ -47,7 +47,7 @@ def make_proxy_request_handler(callback, verbose):
     """
 
     class ProxyRequestHandler(BaseHTTPRequestHandler):
-        if verbose:
+        if not verbose:
             def log_message(self, format, *args):
                 pass
         def do_CONNECT(self):
